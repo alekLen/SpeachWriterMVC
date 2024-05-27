@@ -9,21 +9,26 @@ namespace SpeachWriterMVC.Controllers
     {
         async public Task<IActionResult> ToWrite()
         {
-            var speechConfig = SpeechConfig.FromSubscription("ac8923a842584dbfa1ff8613106ee5dd", "eastus");
-            speechConfig.SpeechRecognitionLanguage = "ru-RUS";
+            MyText model = new MyText();
+            try
+            {
+                var speechConfig = SpeechConfig.FromSubscription("ac8923a842584dbfa1ff8613106ee5dd", "eastus");
+                speechConfig.SpeechRecognitionLanguage = "ru-RUS";
 
-            using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
-            using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
-           
-            var speechRecognitionResult = await speechRecognizer.RecognizeOnceAsync();
-            MyText model=new MyText();
-           model.text= OutputSpeechRecognitionResult(speechRecognitionResult);
+                using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
+                using var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+                var speechRecognitionResult = await speechRecognizer.RecognizeOnceAsync();
+                model.text = OutputSpeechRecognitionResult(speechRecognitionResult);
+            }
+            catch(Exception ex) { model.text = ex.Message; }
+         
             return View(model);
         }
 
         static string OutputSpeechRecognitionResult(SpeechRecognitionResult speechRecognitionResult)
         {
-
+            
             switch (speechRecognitionResult.Reason)
             {
                 case ResultReason.RecognizedSpeech:
