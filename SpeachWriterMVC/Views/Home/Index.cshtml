@@ -6,17 +6,56 @@
     <h1 class="display-4">Добро пожаловать в  SpeachWriter </h1>
     <a asp-controller="Speach" asp-action="ToWrite" onclick="requestMicrophoneAccess()">Нажмите и говорите в микрофон</a>
 </div>
+
 <p id="status"></p>
 
+<button onclick="startRecording()">Начать запись</button>
+<button onclick="stopRecording()">Остановит запись</button>
+
 <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
     async function requestMicrophoneAccess() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-             document.getElementById('status').textContent = "микрофон доступен";
-            // You can now use the stream to capture audio
-            // Example: const audioTracks = stream.getAudioTracks();
+            document.getElementById('status').textContent = "Микрофон доступен";
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioChunks = [];
+
+                const formData = new FormData();
+                formData.append('audio', blob, 'recording.wav');
+
+                await fetch('/api/audio/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                document.getElementById('status').textContent = "Запись загружена";
+            };
         } catch (error) {
-            document.getElementById('status').textContent = "микрофон не доступен " + error.message;
+            document.getElementById('status').textContent = "Микрофон отключен " + error.message;
+        }
+    }
+
+    function startRecording() {
+        if (mediaRecorder) {
+            mediaRecorder.start();
+            document.getElementById('status').textContent = "Идет запись";
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            document.getElementById('status').textContent = "Запись остановлена";
         }
     }
 </script>

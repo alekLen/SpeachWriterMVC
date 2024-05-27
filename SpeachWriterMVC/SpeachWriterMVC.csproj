@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.37.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Uploads\" />
+  </ItemGroup>
+
 </Project>
