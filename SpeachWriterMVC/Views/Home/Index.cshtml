@@ -6,3 +6,17 @@
     <h1 class="display-4">Добро пожаловать в  SpeachWriter </h1>
    <a asp-controller="Speach" asp-action="ToWrite">Нажмите и говорите в микрофон</a>
 </div>
+<p id="status"></p>
+
+<script>
+    async function requestMicrophoneAccess() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+             document.getElementById('status').textContent = "микрофон доступен";
+            // You can now use the stream to capture audio
+            // Example: const audioTracks = stream.getAudioTracks();
+        } catch (error) {
+            document.getElementById('status').textContent = "микрофон не доступен " + error.message;
+        }
+    }
+</script>
