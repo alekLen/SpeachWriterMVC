@@ -4,7 +4,9 @@
 
 <div class="text-center">
     <h1 class="display-4">Добро пожаловать в  SpeachWriter </h1>
-    <a asp-controller="Speach" asp-action="ToWrite" onclick="requestMicrophoneAccess()">Нажмите и говорите в микрофон</a>
+ @*    <a asp-controller="Speach" asp-action="ToWrite" onclick="requestMicrophoneAccess()">Нажмите и говорите в микрофон</a> *@
+
+    <button onclick="requestMicrophoneAccess()">Разрешите доступ к микрофону</button>
 </div>
 
 <p id="status"></p>
