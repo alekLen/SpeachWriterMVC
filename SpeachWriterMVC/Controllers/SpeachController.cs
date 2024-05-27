@@ -7,10 +7,10 @@ namespace SpeachWriterMVC.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class SpeachController : Controller
+    public class AudioController : Controller
     {
         [HttpPost("upload")]
-        async public Task<IActionResult> ToWrite()
+        async public Task<IActionResult> UploadAudio()
         {
             MyText model = new MyText();
 
