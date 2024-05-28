@@ -239,6 +239,28 @@ namespace SpeachWriterMVC.Controllers
                         Console.WriteLine($"Error writing file to {filePath} or processing audio: {ex.Message}");
                         return StatusCode(500, $"Internal server error: {ex.Message}");
                     }
+                    finally
+                    {
+                        // Удаление файлов после обработки
+                        try
+                        {
+                            if (filePath != null && System.IO.File.Exists(filePath))
+                            {
+                                System.IO.File.Delete(filePath);
+                                Console.WriteLine($"Deleted file: {filePath}");
+                            }
+
+                            if (convertedFilePath != null && System.IO.File.Exists(convertedFilePath))
+                            {
+                                System.IO.File.Delete(convertedFilePath);
+                                Console.WriteLine($"Deleted file: {convertedFilePath}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error deleting files: {ex.Message}");
+                        }
+                    }
                 }
 
                 return BadRequest("No audio file uploaded.");
