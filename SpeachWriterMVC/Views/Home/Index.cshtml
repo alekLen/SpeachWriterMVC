@@ -4,60 +4,129 @@
 
 <div class="text-center">
     <h1 class="display-4">Добро пожаловать в  SpeachWriter </h1>
- @*    <a asp-controller="Speach" asp-action="ToWrite" onclick="requestMicrophoneAccess()">Нажмите и говорите в микрофон</a> *@
 
-    <button onclick="requestMicrophoneAccess()">Разрешите доступ к микрофону</button>
+    <button id="requestMicrophoneAccess">Разрешите доступ к микрофону</button>
+    <button id="cancelMicrophoneAccess">Запретить доступ к микрофону</button>
 </div>
 
-<p id="status"></p>
+<p id="status">Микрофон отключен.</p>
+@model SpeachWriterMVC.Models.MyText
 
-<button onclick="startRecording()">Начать запись</button>
-<button onclick="stopRecording()">Остановить запись</button>
+<p>@Model.text</p>
 
-<script>
-    let mediaRecorder;
+<button id="startRecording" onclick="startRecording()" disabled="true">Начать запись</button>
+<button id="stopRecording" onclick="stopRecording()" disabled="true">Остановить запись</button>
+
+<h3 id="speach"></h3>
+
+
+<script src="js/recorder.js"></script>
+@* <script>
+    let recorder;
     let audioChunks = [];
 
-    async function requestMicrophoneAccess() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            document.getElementById('status').textContent = "Микрофон доступен";
-            mediaRecorder = new MediaRecorder(stream);
+    document.getElementById('requestMicrophoneAccess').addEventListener('click', () => {
 
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
-            };
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const input = audioContext.createMediaStreamSource(stream);
+            recorder = new Recorder(input, { numChannels: 1 });
 
-            mediaRecorder.onstop = async () => {
-                const blob = new Blob(audioChunks, { type: 'audio/wav' });
-                audioChunks = [];
+            document.getElementById('status').textContent = "Микрофон доступен.";
 
-                const formData = new FormData();
-                formData.append('audio', blob, 'recording.wav');
+                document.getElementById('startRecording').addEventListener('click', () => {
+                document.getElementById('status').textContent = "Микрофон доступен.Идет запись";
+                recorder.record();
+            });
 
-                await fetch('/api/audio/upload', {
-                    method: 'POST',
-                    body: formData
+            document.getElementById('stopRecording').addEventListener('click', () => {
+                recorder.stop();
+                    document.getElementById('status').textContent = "Микрофон доступен.Запись остановлена";
+                recorder.exportWAV(async (blob) => {
+                    const formData = new FormData();
+                    formData.append('audio', blob, 'recording.wav');
+
+                    const response = await fetch('/api/audio/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const responseText = await response.text();
+                        document.getElementById('speach').textContent = responseText;
+                    } else {
+                            document.getElementById('speach').textContent = await response.text();
+                    }
                 });
+            });
+        })
+        .catch(error => {
+            console.error('Error accessing microphone', error);
+        });
 
-                document.getElementById('status').textContent = "Запись загружена";
-            };
-        } catch (error) {
-            document.getElementById('status').textContent = "Микрофон отключен " + error.message;
-        }
-    }
+    });
 
-    function startRecording() {
-        if (mediaRecorder) {
-            mediaRecorder.start();
-            document.getElementById('status').textContent = "Идет запись";
-        }
-    }
+    document.getElementById('cancelMicrophoneAccess').addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ audio: false })
+        document.getElementById('status').textContent = "Микрофон отключен.";      
+    });
+</script> *@
+
+<script>
+    let recorder;
+    let audioChunks = [];
+
+    document.getElementById('requestMicrophoneAccess').addEventListener('click', () => {
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const input = audioContext.createMediaStreamSource(stream);
+                recorder = new Recorder(input, { numChannels: 1 });
+
+                document.getElementById('startRecording').disabled = false;
+                document.getElementById('stopRecording').disabled = false;
+                document.getElementById('status').textContent = "Микрофон доступен.";
+            })
+            .catch(error => {
+                console.error('Error accessing microphone', error);
+            });
+    });
+     function startRecording(){
+                    document.getElementById('status').textContent = "Микрофон доступен.Идет запись";
+                    recorder.record();
+     }
 
     function stopRecording() {
-        if (mediaRecorder) {
-            mediaRecorder.stop();
-            document.getElementById('status').textContent = "Запись остановлена";
-        }
+                    recorder.stop();
+                    document.getElementById('status').textContent = "Микрофон доступен.Запись остановлена";
+                    recorder.exportWAV(async (blob) => {
+                        const formData = new FormData();
+                        formData.append('audio', blob, 'recording.wav');
+
+                        const response = await fetch('/api/audio/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const responseText = await response.text();
+                            document.getElementById('speach').textContent = responseText;
+                        } else {
+                            document.getElementById('speach').textContent = await response.text();
+                        }
+                    });
     }
+           
+           
+
+   
+
+    document.getElementById('cancelMicrophoneAccess').addEventListener('click', () => {
+        navigator.mediaDevices.getUserMedia({ audio: false });
+        document.getElementById('status').textContent = "Микрофон отключен.";
+        document.getElementById('startRecording').disabled = true;
+        document.getElementById('stopRecording').disabled = true;
+    });
 </script>

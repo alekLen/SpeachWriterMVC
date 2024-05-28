@@ -15,8 +15,9 @@ namespace SpeachWriterMVC.Controllers
 
         public IActionResult Index()
         {
-
-            return View();
+            MyText t=new MyText();
+            t.text = "";
+            return View(t);
         }
 
         public IActionResult Privacy()
