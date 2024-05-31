@@ -9,12 +9,12 @@
     <button id="cancelMicrophoneAccess">Запретить доступ к микрофону</button>
 </div>
 
-<p id="status" style="color:red">Микрофон отключен.</p>
+<p id="status" style="color:red;"  >Микрофон отключен.</p>
 @model SpeachWriterMVC.Models.MyText
 
 <p>@Model.text</p>
 
-<button id="startRecording" onclick="startRecording()" >Запись</button>
+<button id="startRecording" onclick="startRecording()" disabled="true">Запись</button><span>&nbsp; ! Говорите, нажав кнопку</span>
 
 <br /><span id="speach"></span>
 <h3 id="speachtrans"></h3>
@@ -32,7 +32,7 @@
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const input = audioContext.createMediaStreamSource(stream);
                 recorder = new Recorder(input, { numChannels: 1 });
-              
+                document.querySelector("#startRecording").disabled = false;
                 document.getElementById('status').textContent = "Микрофон доступен.";
             })
             .catch(error => {
@@ -52,6 +52,8 @@
     document.getElementById("startRecording").addEventListener("mouseup", function (event) {
        
             recorder.stop();
+        document.getElementById("startRecording").style.backgroundColor = "";
+        document.getElementById("startRecording").style.color = "black";
             document.getElementById('status').textContent = "Микрофон доступен. Запись остановлена. Обрабатывается голос в текст.";
             recorder.exportWAV(async (blob) => {
                 const formData = new FormData();
@@ -76,8 +78,9 @@
     document.getElementById("startRecording").addEventListener("mousedown", function (event) {
 
         document.getElementById('status').textContent = "Микрофон доступен.Идет запись";
-        recorder.record();  
-           
+        recorder.record();
+        document.getElementById("startRecording").style.backgroundColor = "green";
+        document.getElementById("startRecording").style.color = "white";
     });
 
 </script>
