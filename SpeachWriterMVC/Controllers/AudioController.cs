@@ -100,7 +100,7 @@ namespace SpeachWriterMVC.Controllers
 
                             var obj = JsonConvert.DeserializeObject<Responce[]>(translatedstr);
                 
-                            return Ok(obj[0].translations[0].text);
+                            return Ok(result.Text + "&"+obj[0].translations[0].text);
                         }
                         catch (ApplicationException ex)
                         {

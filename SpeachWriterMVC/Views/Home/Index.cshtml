@@ -3,21 +3,21 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Добро пожаловать в  SpeechWriter </h1>
+    <h1 class="display-4">Добро пожаловать в  SpeechTranslator </h1>
 
     <button id="requestMicrophoneAccess">Разрешите доступ к микрофону</button>
     <button id="cancelMicrophoneAccess">Запретить доступ к микрофону</button>
 </div>
 
-<p id="status">Микрофон отключен.</p>
+<p id="status" style="color:red">Микрофон отключен.</p>
 @model SpeachWriterMVC.Models.MyText
 
 <p>@Model.text</p>
 
-<button id="startRecording" onclick="startRecording()" disabled="true">Начать запись</button>
-<button id="stopRecording" onclick="stopRecording()" disabled="true">Остановить запись</button>
+<button id="startRecording" onclick="startRecording()" >Запись</button>
 
-<h3 id="speach"></h3>
+<br /><span id="speach"></span>
+<h3 id="speachtrans"></h3>
 
 
 <script src="js/recorder.js"></script>
@@ -32,8 +32,6 @@
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const input = audioContext.createMediaStreamSource(stream);
                 recorder = new Recorder(input, { numChannels: 1 });
-
-                document.getElementById('startRecording').disabled = false;
               
                 document.getElementById('status').textContent = "Микрофон доступен.";
             })
@@ -42,43 +40,44 @@
             });
     });
      function startRecording(){
-                    document.getElementById('status').textContent = "Микрофон доступен.Идет запись";
-                    recorder.record();
-        document.getElementById('startRecording').disabled = true;
-        document.getElementById('stopRecording').disabled = false;
+
      }
 
-    function stopRecording() {
-                    recorder.stop();
-                    document.getElementById('status').textContent = "Микрофон доступен.Запись остановлена.Обрабатывается голос в текст.";
-        document.getElementById('startRecording').disabled = false;
-        document.getElementById('stopRecording').disabled = true;
-                    recorder.exportWAV(async (blob) => {
-                        const formData = new FormData();
-                        formData.append('audio', blob, 'recording.wav');
-
-                        const response = await fetch('/api/audio/upload', {
-                            method: 'POST',
-                            body: formData
-                        });
-
-                        if (response.ok) {
-                            const responseText = await response.text();
-                            document.getElementById('speach').textContent = responseText;
-                        } else {
-                            document.getElementById('speach').textContent = await response.text();
-                        }
-                    });
-    }
-           
-           
-
-   
 
     document.getElementById('cancelMicrophoneAccess').addEventListener('click', () => {
-        navigator.mediaDevices.getUserMedia({ audio: false });
-        document.getElementById('status').textContent = "Микрофон отключен.";
-        document.getElementById('startRecording').disabled = true;
-        document.getElementById('stopRecording').disabled = true;
+        location.reload();
     });
+
+
+    document.getElementById("startRecording").addEventListener("mouseup", function (event) {
+       
+            recorder.stop();
+            document.getElementById('status').textContent = "Микрофон доступен. Запись остановлена. Обрабатывается голос в текст.";
+            recorder.exportWAV(async (blob) => {
+                const formData = new FormData();
+                formData.append('audio', blob, 'recording.wav');
+
+                const response = await fetch('/api/audio/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                const originalString = await response.text();
+                const parts = originalString.split('&', 2);
+                document.getElementById('speach').textContent = parts[0];
+                document.getElementById('speachtrans').textContent = parts[1];
+                } else {
+                    document.getElementById('speach').textContent = await response.text();
+                }
+            });
+    });
+
+    document.getElementById("startRecording").addEventListener("mousedown", function (event) {
+
+        document.getElementById('status').textContent = "Микрофон доступен.Идет запись";
+        recorder.record();  
+           
+    });
+
 </script>
