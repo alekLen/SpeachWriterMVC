@@ -14,9 +14,10 @@
 
 <p>@Model.text</p>
 
-<button id="startRecording" onclick="startRecording()" disabled="true">Запись</button><span>&nbsp; ! Говорите, нажав кнопку</span>
-
-<br /><span id="speach"></span>
+<button id="startRecording" onclick="startRecording()" disabled="true">Запись</button>
+<span id="warn"></span>
+<hr />
+<span id="speach"></span>
 <h3 id="speachtrans"></h3>
 
 
@@ -34,6 +35,7 @@
                 recorder = new Recorder(input, { numChannels: 1 });
                 document.querySelector("#startRecording").disabled = false;
                 document.getElementById('status').textContent = "Микрофон доступен.";
+                document.getElementById('warn').textContent = "Говорите, нажав кнопку!";
             })
             .catch(error => {
                 console.error('Error accessing microphone', error);
@@ -68,8 +70,10 @@
                 const parts = originalString.split('&', 2);
                 document.getElementById('speach').textContent = parts[0];
                 document.getElementById('speachtrans').textContent = parts[1];
+                document.getElementById('status').textContent = "Микрофон доступен.";
                 } else {
                     document.getElementById('speach').textContent = await response.text();
+                document.getElementById('status').textContent = "Микрофон доступен.";
                 }
             });
     });
